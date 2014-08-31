@@ -1,0 +1,43 @@
+{{!< default}}
+
+<header class="main-header {{#if @blog.cover}}" style="background-image: url({{@blog.cover}}){{else}}no-cover{{/if}}">
+    <nav class="main-nav overlay clearfix">
+        {{#if @blog.logo}}<a class="blog-logo" href="{{@blog.url}}"><img src="{{@blog.logo}}" alt="Blog Logo" /></a>{{/if}}
+        <a class="subscribe-button icon-feed" href="{{@blog.url}}/rss/">Subscribe</a>
+    </nav>
+    <div class="vertical">
+        <div class="main-header-content inner">
+            <h1 class="page-title">{{@blog.title}}</h1>
+            <h2 class="page-description">{{@blog.description}}</h2>
+            <br/>
+            <input id="searchText" type="search" placeholder="search" value="{{query}}"></input>
+        </div>
+    </div>
+    <a class="scroll-down icon-arrow-left" href="#content" data-offset="-45"><span class="hidden">Scroll Down</span></a>
+</header>
+
+<main id="content" class="content" role="main">
+    <article>
+        <h3 style="text-align: center;">Search results for "{{query}}".</h3>
+        <hr />
+
+        {{#foreach result.hits.hits}}
+
+            {{#with _source}}
+            <article class="{{post_class}}">
+                <header class="post-header">
+                    <h2 class="post-title"><a href="/{{slug}}/">{{{title}}}</a></h2>
+                </header>
+                <section class="post-excerpt">
+                    <p>{{excerpt words="30"}} <a class="read-more" href="/{{slug}}/">&raquo;</a></p>
+                </section>
+                <footer class="post-meta">
+                    <time class="post-date" datetime="{{date format='YYYY-MM-DD'}}">{{date format="DD MMMM YYYY"}}</time>
+                </footer>
+            </article>
+            {{/with}}
+
+        {{/foreach}}
+    </article>
+
+</main>

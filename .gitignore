@@ -70,3 +70,7 @@ config.js
 
 # Coverage reports
 coverage.html
+
+# elastic search data and log folders
+elasticsearch-1.3.2/data
+elasticsearch-1.3.2/logs

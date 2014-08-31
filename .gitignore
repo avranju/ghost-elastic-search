@@ -34,8 +34,8 @@ Session.vim
 .tern-project
 
 # Ghost DB file
-*.db
-*.db-journal
+.db
+.db-journal
 
 .build
 .dist

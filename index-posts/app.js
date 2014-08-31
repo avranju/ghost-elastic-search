@@ -55,7 +55,7 @@ function loadPosts(file, cb) {
       return;
     }
 
-    db.all("select id, slug, markdown from posts", function(err, rows) {
+    db.all("select id, title, slug, markdown, html from posts", function(err, rows) {
       cb(err, rows);
     });
   })

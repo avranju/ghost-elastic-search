@@ -510,6 +510,61 @@ frontendControllers = {
                 });
             });
         }).catch(handleError(next));
+    },
+    'search': function(req, res, next) {
+      // build the search command
+        var queryText = req.query.q;
+        var command = {
+            query: {
+                dis_max: {
+                    queries: [
+                        {
+                            match: {
+                                title: queryText
+                            }
+                        },
+                        {
+                            match: {
+                                markdown: queryText
+                            }
+                        }
+                    ]
+                }
+            }
+        };
+
+        // run the search
+        var searchUrl = config.get().searchUrl;
+        return new Promise(function(resolve, reject) {
+            var options = _.merge(url.parse(searchUrl), {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            });
+            var clientReq = require('http').request(options, function(clientRes) {
+                var resultText = "";
+                clientRes.on("data", function(chunk) {
+                    resultText += chunk.toString();
+                });
+                clientRes.on("end", function() {
+                    resolve(JSON.parse(resultText));
+                });
+            });
+
+            clientReq.on("error", function(e) {
+                reject(e);
+            });
+
+            clientReq.write(JSON.stringify(command));
+            clientReq.end();
+        }).then(function(result) {
+            // render search results page
+            res.render("search", {
+                query: queryText,
+                result: result
+            });
+        }).catch(handleError(next));
     }
 };
 

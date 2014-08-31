@@ -1,0 +1,11 @@
+{
+  "name": "index-posts",
+  "version": "0.0.1",
+  "description": "Index Ghost posts to elasticsearch.",
+  "author": "@avranju",
+  "dependencies": {
+    "async": "^0.9.0",
+    "request": "^2.40.0",
+    "sqlite3": "^2.2.7"
+  }
+}

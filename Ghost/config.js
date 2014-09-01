@@ -10,7 +10,7 @@ config = {
     // When running Ghost in the wild, use the production environment
     // Configure your URL and mail settings here
     production: {
-        url: 'http://my-ghost-blog.com',
+        url: 'http://azure-demo-01.azurewebsites.net',
         mail: {},
         database: {
             client: 'sqlite3',
@@ -23,9 +23,9 @@ config = {
             // Host to be passed to node's `net.Server#listen()`
             host: '127.0.0.1',
             // Port to be passed to node's `net.Server#listen()`, for iisnode set this to `process.env.PORT`
-            port: '2368'
+            port: process.env.PORT
         },
-        searchUrl: 'http://localhost:9200/blog/posts/_search'
+        searchUrl: 'http://elsearch.cloudapp.net:9200/blog/posts/_search'
     },
 
     // ### Development **(default)**
@@ -65,7 +65,7 @@ config = {
         paths: {
             contentPath: path.join(__dirname, '/content/')
         },
-        searchUrl: 'http://localhost:9200/blog/posts/_search'
+        searchUrl: 'http://elsearch.cloudapp.net:9200/blog/posts/_search'
     },
 
     // **Developers only need to edit below here**
@@ -86,7 +86,7 @@ config = {
             port: '2369'
         },
         logging: false,
-        searchUrl: 'http://localhost:9200/blog/posts/_search'
+        searchUrl: 'http://elsearch.cloudapp.net:9200/blog/posts/_search'
     },
 
     // ### Testing MySQL

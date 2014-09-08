@@ -1,4 +1,4 @@
-azure-demo-01
-=============
+ghost-elastic-search
+====================
 
-Azure websites and VM demo app
+Ghost blog with integrated search provided by [ElasticSearch](http://www.elasticsearch.org/).

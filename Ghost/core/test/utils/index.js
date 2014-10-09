@@ -26,7 +26,6 @@ var Promise       = require('bluebird'),
     initData,
     clearData;
 
-
 /** TEST FIXTURES **/
 fixtures = {
     insertPosts: function insertPosts() {
@@ -39,8 +38,8 @@ fixtures = {
     },
 
     insertMultiAuthorPosts: function insertMultiAuthorPosts(max) {
+        /*jshint unused:false*/
         var knex = config.database.knex,
-            tags,
             author,
             authors,
             i, j, k = postsInserted,
@@ -48,10 +47,10 @@ fixtures = {
 
         max = max || 50;
         // insert users of different roles
-        return Promise.resolve(fixtures.createUsersWithRoles()).then(function (results) {
+        return Promise.resolve(fixtures.createUsersWithRoles()).then(function () {
             // create the tags
             return knex('tags').insert(DataGenerator.forKnex.tags);
-        }).then(function (results) {
+        }).then(function () {
             return knex('users').select('id');
         }).then(function (results) {
             authors = _.pluck(results, 'id');
@@ -59,7 +58,8 @@ fixtures = {
             // Let's insert posts with random authors
             for (i = 0; i < max; i += 1) {
                 author = authors[i % authors.length];
-                posts.push(DataGenerator.forKnex.createGenericPost(k++, null, null, author));
+                posts.push(DataGenerator.forKnex.createGenericPost(k, null, null, author));
+                k = k + 1;
             }
 
             // Keep track so we can run this function again safely
@@ -109,11 +109,13 @@ fixtures = {
 
         for (i = 0; i < 2; i += 1) {
             lang = i % 2 ? 'en' : 'fr';
-            posts.push(DataGenerator.forKnex.createGenericPost(k++, null, lang));
+            posts.push(DataGenerator.forKnex.createGenericPost(k, null, lang));
+            k = k + 1;
 
             for (j = 0; j < max; j += 1) {
                 status = j % 2 ? 'draft' : 'published';
-                posts.push(DataGenerator.forKnex.createGenericPost(k++, status, lang));
+                posts.push(DataGenerator.forKnex.createGenericPost(k, status, lang));
+                k = k + 1;
             }
         }
 
@@ -170,7 +172,7 @@ fixtures = {
             knex = config.database.knex;
 
         user = DataGenerator.forKnex.createBasic(user);
-        user = _.extend({}, user, {'status': 'inactive'});
+        user = _.extend({}, user, {status: 'inactive'});
 
         return knex('roles').insert(DataGenerator.forKnex.roles).then(function () {
             return knex('users').insert(user);
@@ -224,9 +226,9 @@ fixtures = {
 
         return knex('users').insert(extraUsers).then(function () {
             return knex('roles_users').insert([
-                    { user_id: 5, role_id: 1},
-                    { user_id: 6, role_id: 2},
-                    { user_id: 7, role_id: 3}
+                {user_id: 5, role_id: 1},
+                {user_id: 6, role_id: 2},
+                {user_id: 7, role_id: 3}
             ]);
         });
     },
@@ -256,9 +258,9 @@ fixtures = {
 
         return knex('users').insert(extraUsers).then(function () {
             return knex('roles_users').insert([
-                    { user_id: 8, role_id: 1},
-                    { user_id: 9, role_id: 2},
-                    { user_id: 10, role_id: 3}
+                {user_id: 8, role_id: 1},
+                {user_id: 9, role_id: 2},
+                {user_id: 10, role_id: 3}
             ]);
         });
     },
@@ -299,12 +301,12 @@ fixtures = {
             permsToInsert = permsFixtures.permissions[obj],
             permsRolesToInsert = permsFixtures.permissions_roles,
             actions = [],
-            permissions_roles = [],
+            permissionsRoles = [],
             roles = {
-                'Administrator': 1,
-                'Editor': 2,
-                'Author': 3,
-                'Owner': 4
+                Administrator: 1,
+                Editor: 2,
+                Author: 3,
+                Owner: 4
             };
 
         permsToInsert = _.map(permsToInsert, function (perms) {
@@ -317,19 +319,18 @@ fixtures = {
             if (perms[obj]) {
                 if (perms[obj] === 'all') {
                     _.each(actions, function (action, i) {
-                        permissions_roles.push({permission_id: (i + 1), role_id: roles[role]});
+                        permissionsRoles.push({permission_id: (i + 1), role_id: roles[role]});
                     });
-                }
-                else {
+                } else {
                     _.each(perms[obj], function (action) {
-                        permissions_roles.push({permission_id: (_.indexOf(actions, action) + 1), role_id: roles[role]});
+                        permissionsRoles.push({permission_id: (_.indexOf(actions, action) + 1), role_id: roles[role]});
                     });
                 }
             }
         });
 
         return knex('permissions').insert(permsToInsert).then(function () {
-            return knex('permissions_roles').insert(permissions_roles);
+            return knex('permissions_roles').insert(permissionsRoles);
         });
     }
 };
@@ -345,38 +346,38 @@ clearData = function clearData() {
 };
 
 toDoList = {
-    'app': function insertApp() { return fixtures.insertOne('apps', 'createApp'); },
-    'app_field': function insertAppField() {
+    app: function insertApp() { return fixtures.insertOne('apps', 'createApp'); },
+    app_field: function insertAppField() {
         // TODO: use the actual app ID to create the field
         return fixtures.insertOne('apps', 'createApp').then(function () {
             return fixtures.insertOne('app_fields', 'createAppField');
         });
     },
-    'app_setting': function insertAppSetting() {
+    app_setting: function insertAppSetting() {
         // TODO: use the actual app ID to create the field
         return fixtures.insertOne('apps', 'createApp').then(function () {
             return fixtures.insertOne('app_settings', 'createAppSetting');
         });
     },
-    'permission': function insertPermission() { return fixtures.insertOne('permissions', 'createPermission'); },
-    'role': function insertRole() { return fixtures.insertOne('roles', 'createRole'); },
-    'roles': function insertRoles() { return fixtures.insertRoles(); },
-    'tag': function insertTag() { return fixtures.insertOne('tags', 'createTag'); },
+    permission: function insertPermission() { return fixtures.insertOne('permissions', 'createPermission'); },
+    role: function insertRole() { return fixtures.insertOne('roles', 'createRole'); },
+    roles: function insertRoles() { return fixtures.insertRoles(); },
+    tag: function insertTag() { return fixtures.insertOne('tags', 'createTag'); },
 
-    'posts': function insertPosts() { return fixtures.insertPosts(); },
+    posts: function insertPosts() { return fixtures.insertPosts(); },
     'posts:mu': function insertMultiAuthorPosts() { return fixtures.insertMultiAuthorPosts(); },
-    'apps': function insertApps() { return fixtures.insertApps(); },
-    'settings': function populateSettings() {
+    apps: function insertApps() { return fixtures.insertApps(); },
+    settings: function populateSettings() {
         return Models.Settings.populateDefaults().then(function () { return SettingsAPI.updateSettingsCache(); });
     },
     'users:roles': function createUsersWithRoles() { return fixtures.createUsersWithRoles(); },
-    'users': function createExtraUsers() { return fixtures.createExtraUsers(); },
+    users: function createExtraUsers() { return fixtures.createExtraUsers(); },
     'user:token': function createTokensForUser() { return fixtures.createTokensForUser(); },
-    'owner': function insertOwnerUser() { return fixtures.insertOwnerUser(); },
+    owner: function insertOwnerUser() { return fixtures.insertOwnerUser(); },
     'owner:pre': function initOwnerUser() { return fixtures.initOwnerUser(); },
     'owner:post': function overrideOwnerUser() { return fixtures.overrideOwnerUser(); },
     'perms:init': function initPermissions() { return permissions.init(); },
-    'perms': function permissionsFor(obj) {
+    perms: function permissionsFor(obj) {
         return function permissionsForObj() { return fixtures.permissionsFor(obj); };
     }
 };
@@ -391,7 +392,7 @@ toDoList = {
   *  * `perms:init` - initialise the permissions object after having added permissions
   *  * `perms:obj` - initialise permissions for a particular object type
   *  * `users:roles` - create a full suite of users, one per role
- * @param options
+ * @param {Object} toDos
  */
 getFixtureOps = function getFixtureOps(toDos) {
     // default = default fixtures, if it isn't present, init with tables only
@@ -421,14 +422,12 @@ getFixtureOps = function getFixtureOps(toDos) {
     return fixtureOps;
 };
 
-
 // ## Test Setup and Teardown
 
 initFixtures = function initFixtures() {
-    var options = _.merge({'init': true}, _.transform(arguments, function (result, val) {
-                result[val] = true;
-            })
-        ),
+    var options = _.merge({init: true}, _.transform(arguments, function (result, val) {
+            result[val] = true;
+        })),
         fixtureOps = getFixtureOps(options);
 
     return sequence(fixtureOps);
@@ -470,16 +469,15 @@ doAuth = function doAuth() {
     delete options[0];
     // No DB setup, but override the owner
     options = _.merge({'owner:post': true}, _.transform(options, function (result, val) {
-            result[val] = true;
-        })
-    );
+        result[val] = true;
+    }));
 
     fixtureOps = getFixtureOps(options);
 
     return new Promise(function (resolve, reject) {
         return sequence(fixtureOps).then(function () {
             request.post('/ghost/api/v0.1/authentication/token/')
-                .send({ grant_type: 'password', username: user.email, password: user.password, client_id: 'ghost-admin'})
+                .send({grant_type: 'password', username: user.email, password: user.password, client_id: 'ghost-admin'})
                 .end(function (err, res) {
                     if (err) {
                         return reject(err);
@@ -540,6 +538,12 @@ module.exports = {
             author: 3
         }
     },
-    ONE_HOUR_S: 3600,
-    ONE_YEAR_S: 31536000
+
+    cacheRules: {
+        public: 'public, max-age=0',
+        hour:  'public, max-age=' + 3600,
+        day: 'public, max-age=' + 86400,
+        year:  'public, max-age=' + 31536000,
+        private: 'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0'
+    }
 };

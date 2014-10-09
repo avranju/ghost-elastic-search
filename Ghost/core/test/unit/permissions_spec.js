@@ -1,4 +1,4 @@
-/*globals describe, before, beforeEach, afterEach, after, it*/
+/*globals describe, before, beforeEach, afterEach, it*/
 /*jshint expr:true*/
 var testUtils       = require('../utils'),
     should          = require('should'),
@@ -9,8 +9,8 @@ var testUtils       = require('../utils'),
     // Stuff we are testing
     Models          = require('../../server/models'),
     permissions     = require('../../server/permissions'),
-    effectivePerms  = require('../../server/permissions/effective'),
-    context         = testUtils.context.owner,
+//    effectivePerms  = require('../../server/permissions/effective'),
+//    context         = testUtils.context.owner,
 
     sandbox         = sinon.sandbox.create();
 
@@ -33,9 +33,7 @@ describe('Permissions', function () {
         sandbox.stub(Models.Permission, 'findAll', function () {
             return Promise.resolve(Models.Permissions.forge(permissions));
         });
-
     });
-
 
     it('can load an actions map from existing permissions', function (done) {
         permissions.init().then(function (actionsMap) {
@@ -48,9 +46,6 @@ describe('Permissions', function () {
             done();
         }).catch(done);
     });
-
-
-
 
 //    it('does not allow edit post without permission', function (done) {
 //        var fakePage = {
@@ -70,7 +65,7 @@ describe('Permissions', function () {
 //                done(new Error('was able to edit post without permission'));
 //            }).catch(done);
 //    });
-//////
+// ////
 //    it('allows edit post with permission', function (done) {
 //        var fakePost = {
 //            id: '1'

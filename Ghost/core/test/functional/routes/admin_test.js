@@ -6,20 +6,10 @@
 // But then again testing real code, rather than mock code, might be more useful...
 
 var request    = require('supertest'),
-    express    = require('express'),
     should     = require('should'),
-    moment     = require('moment'),
 
     testUtils  = require('../../utils'),
-    ghost      = require('../../../../core'),
-    agent      = request.agent,
-
-    cacheRules = {
-        'public': 'public, max-age=0',
-        'hour':  'public, max-age=' + testUtils.ONE_HOUR_S,
-        'year':  'public, max-age=' + testUtils.ONE_YEAR_S,
-        'private': 'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0'
-    };
+    ghost      = require('../../../../core');
 
 describe('Admin Routing', function () {
     function doEnd(done) {
@@ -49,11 +39,9 @@ describe('Admin Routing', function () {
     }
 
     before(function (done) {
-        var app = express();
-
-        ghost({app: app}).then(function () {
+        ghost().then(function (ghostServer) {
             // Setup the request object with the ghost express app
-            request = request(app);
+            request = request(ghostServer.rootApp);
 
             done();
         }).catch(function (e) {
@@ -69,11 +57,10 @@ describe('Admin Routing', function () {
     });
 
     describe('Legacy Redirects', function () {
-
         it('should redirect /logout/ to /ghost/signout/', function (done) {
             request.get('/logout/')
                 .expect('Location', '/ghost/signout/')
-                .expect('Cache-Control', cacheRules.year)
+                .expect('Cache-Control', testUtils.cacheRules.year)
                 .expect(301)
                 .end(doEndNoAuth(done));
         });
@@ -81,7 +68,7 @@ describe('Admin Routing', function () {
         it('should redirect /signout/ to /ghost/signout/', function (done) {
             request.get('/signout/')
                 .expect('Location', '/ghost/signout/')
-                .expect('Cache-Control', cacheRules.year)
+                .expect('Cache-Control', testUtils.cacheRules.year)
                 .expect(301)
                 .end(doEndNoAuth(done));
         });
@@ -89,7 +76,7 @@ describe('Admin Routing', function () {
         it('should redirect /signup/ to /ghost/signup/', function (done) {
             request.get('/signup/')
                 .expect('Location', '/ghost/signup/')
-                .expect('Cache-Control', cacheRules.year)
+                .expect('Cache-Control', testUtils.cacheRules.year)
                 .expect(301)
                 .end(doEndNoAuth(done));
         });
@@ -98,7 +85,7 @@ describe('Admin Routing', function () {
         it('should redirect /signin/ to /ghost/', function (done) {
             request.get('/signin/')
                 .expect('Location', '/ghost/')
-                .expect('Cache-Control', cacheRules.public)
+                .expect('Cache-Control', testUtils.cacheRules.public)
                 .expect(302)
                 .end(doEndNoAuth(done));
         });
@@ -106,7 +93,7 @@ describe('Admin Routing', function () {
         it('should redirect /admin/ to /ghost/', function (done) {
             request.get('/admin/')
                 .expect('Location', '/ghost/')
-                .expect('Cache-Control', cacheRules.public)
+                .expect('Cache-Control', testUtils.cacheRules.public)
                 .expect(302)
                 .end(doEndNoAuth(done));
         });
@@ -120,7 +107,7 @@ describe('Admin Routing', function () {
     });
 
     // we'll use X-Forwarded-Proto: https to simulate an 'https://' request behind a proxy
-    describe('Require HTTPS - no redirect', function() {
+    describe('Require HTTPS - no redirect', function () {
         var forkedGhost, request;
         before(function (done) {
             var configTestHttps = testUtils.fork.config();
@@ -128,7 +115,7 @@ describe('Admin Routing', function () {
             configTestHttps.urlSSL = 'https://localhost/';
 
             testUtils.fork.ghost(configTestHttps, 'testhttps')
-                .then(function(child) {
+                .then(function (child) {
                     forkedGhost = child;
                     request = require('supertest');
                     request = request(configTestHttps.url.replace(/\/$/, ''));
@@ -142,13 +129,13 @@ describe('Admin Routing', function () {
             }
         });
 
-        it('should block admin access over non-HTTPS', function(done) {
+        it('should block admin access over non-HTTPS', function (done) {
             request.get('/ghost/')
                 .expect(403)
                 .end(done);
         });
 
-        it('should allow admin access over HTTPS', function(done) {
+        it('should allow admin access over HTTPS', function (done) {
             request.get('/ghost/setup/')
                 .set('X-Forwarded-Proto', 'https')
                 .expect(200)
@@ -156,7 +143,7 @@ describe('Admin Routing', function () {
         });
     });
 
-    describe('Require HTTPS - redirect', function() {
+    describe('Require HTTPS - redirect', function () {
         var forkedGhost, request;
         before(function (done) {
             var configTestHttps = testUtils.fork.config();
@@ -164,7 +151,7 @@ describe('Admin Routing', function () {
             configTestHttps.urlSSL = 'https://localhost/';
 
             testUtils.fork.ghost(configTestHttps, 'testhttps')
-                .then(function(child) {
+                .then(function (child) {
                     forkedGhost = child;
                     request = require('supertest');
                     request = request(configTestHttps.url.replace(/\/$/, ''));
@@ -178,14 +165,14 @@ describe('Admin Routing', function () {
             }
         });
 
-        it('should redirect admin access over non-HTTPS', function(done) {
+        it('should redirect admin access over non-HTTPS', function (done) {
             request.get('/ghost/')
                 .expect('Location', /^https:\/\/localhost\/ghost\//)
                 .expect(301)
                 .end(done);
         });
 
-        it('should allow admin access over HTTPS', function(done) {
+        it('should allow admin access over HTTPS', function (done) {
             request.get('/ghost/setup/')
                 .set('X-Forwarded-Proto', 'https')
                 .expect(200)
@@ -195,17 +182,17 @@ describe('Admin Routing', function () {
 
     describe('Ghost Admin Setup', function () {
         it('should redirect from /ghost/ to /ghost/setup/ when no user/not installed yet', function (done) {
-             request.get('/ghost/')
-                 .expect('Location', /ghost\/setup/)
-                 .expect('Cache-Control', cacheRules['private'])
-                 .expect(302)
-                 .end(doEnd(done));
+            request.get('/ghost/')
+                .expect('Location', /ghost\/setup/)
+                .expect('Cache-Control', testUtils.cacheRules['private'])
+                .expect(302)
+                .end(doEnd(done));
         });
 
         it('should redirect from /ghost/signin/ to /ghost/setup/ when no user', function (done) {
             request.get('/ghost/signin/')
                 .expect('Location', /ghost\/setup/)
-                .expect('Cache-Control', cacheRules['private'])
+                .expect('Cache-Control', testUtils.cacheRules['private'])
                 .expect(302)
                 .end(doEnd(done));
         });
@@ -213,7 +200,7 @@ describe('Admin Routing', function () {
         it('should respond with html for /ghost/setup/', function (done) {
             request.get('/ghost/setup/')
                 .expect('Content-Type', /html/)
-                .expect('Cache-Control', cacheRules['private'])
+                .expect('Cache-Control', testUtils.cacheRules['private'])
                 .expect(200)
                 .end(doEnd(done));
         });
@@ -237,7 +224,6 @@ describe('Admin Routing', function () {
 //        it('should redirect from /ghost/signup to /ghost/ when logged in', function (done) {
 //           done();
 //        });
-
     });
 //
 //    describe('Ghost Admin Forgot Password', function () {
@@ -258,14 +244,14 @@ describe('Admin Routing', function () {
 //        it('should respond with html for /ghost/forgotten/', function (done) {
 //            request.get('/ghost/forgotten/')
 //                .expect('Content-Type', /html/)
-//                .expect('Cache-Control', cacheRules['private'])
+//                .expect('Cache-Control', testUtils.cacheRules['private'])
 //                .expect(200)
 //                .end(doEnd(done));
 //        });
 //
 //        it('should respond 404 for /ghost/reset/', function (done) {
 //            request.get('/ghost/reset/')
-//                .expect('Cache-Control', cacheRules['private'])
+//                .expect('Cache-Control', testUtils.cacheRules['private'])
 //                .expect(404)
 //                .expect(/Page Not Found/)
 //                .end(doEnd(done));
@@ -274,12 +260,12 @@ describe('Admin Routing', function () {
 //        it('should redirect /ghost/reset/*/', function (done) {
 //            request.get('/ghost/reset/athing/')
 //                .expect('Location', /ghost\/forgotten/)
-//                .expect('Cache-Control', cacheRules['private'])
+//                .expect('Cache-Control', testUtils.cacheRules['private'])
 //                .expect(302)
 //                .end(doEnd(done));
 //        });
 //    });
-//});
+// });
 
 // TODO: not working anymore, needs new test for Ember
 // describe('Authenticated Admin Routing', function () {
@@ -308,8 +294,7 @@ describe('Admin Routing', function () {
 //                                 return done(err);
 //                             }
 
-
-//                             process.nextTick(function() {
+//                             process.nextTick(function () {
 //                                 request.post('/ghost/signin/')
 //                                     .send({email: user.email, password: user.password})
 //                                     .expect(200)

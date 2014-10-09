@@ -25,9 +25,23 @@ var ApplicationRoute = Ember.Route.extend(SimpleAuth.ApplicationRouteMixin, Shor
             this._super();
         },
 
+        toggleGlobalMobileNav: function () {
+            this.toggleProperty('controller.showGlobalMobileNav');
+        },
+
+        toggleRightOutlet: function () {
+            this.toggleProperty('controller.showRightOutlet');
+        },
+        closeRightOutlet: function () {
+            this.set('controller.showRightOutlet', false);
+        },
+
         closePopups: function () {
-            this.get('popover').closePopovers();
+            this.get('dropdown').closeDropdowns();
             this.get('notifications').closeAll();
+
+            // Close right outlet if open
+            this.send('closeRightOutlet');
 
             this.send('closeModal');
         },
@@ -64,7 +78,7 @@ var ApplicationRoute = Ember.Route.extend(SimpleAuth.ApplicationRouteMixin, Shor
         },
 
         openModal: function (modalName, model, type) {
-            this.get('popover').closePopovers();
+            this.get('dropdown').closeDropdowns();
             modalName = 'modals/' + modalName;
             // We don't always require a modal to have a controller
             // so we're skipping asserting if one exists
@@ -83,7 +97,7 @@ var ApplicationRoute = Ember.Route.extend(SimpleAuth.ApplicationRouteMixin, Shor
         },
 
         closeModal: function () {
-            return this.disconnectOutlet({
+            this.disconnectOutlet({
                 outlet: 'modal',
                 parentView: 'application'
             });

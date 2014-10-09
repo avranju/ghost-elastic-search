@@ -24,7 +24,7 @@ validator.extend('notContains', function (str, badString) {
 });
 
 validator.extend('isEmptyOrURL', function (str) {
-    return (_.isEmpty(str) || validator.isURL(str, { require_protocol: false }));
+    return (_.isEmpty(str) || validator.isURL(str, {require_protocol: false}));
 });
 
 // Validation validation against schema attributes
@@ -57,12 +57,12 @@ validateSchema = function (tableName, model) {
                 }
             }
 
-            //check validations objects
+            // check validations objects
             if (schema[tableName][columnKey].hasOwnProperty('validations')) {
                 validationErrors = validationErrors.concat(validate(model[columnKey], columnKey, schema[tableName][columnKey].validations));
             }
 
-            //check type
+            // check type
             if (schema[tableName][columnKey].hasOwnProperty('type')) {
                 if (schema[tableName][columnKey].type === 'integer' && !validator.isInt(model[columnKey])) {
                     message = 'Value in [' + tableName + '.' + columnKey + '] is not an integer.';
@@ -98,16 +98,18 @@ validateSettings = function (defaultSettings, model) {
     return Promise.resolve();
 };
 
-// A Promise that will resolve to an object with a property for each installed theme.
-// This is necessary because certain configuration data is only available while Ghost
-// is running and at times the validations are used when it's not (e.g. tests)
-availableThemes = requireTree(config.paths.themePath);
-
 validateActiveTheme = function (themeName) {
     // If Ghost is running and its availableThemes collection exists
     // give it priority.
     if (config.paths.availableThemes && Object.keys(config.paths.availableThemes).length > 0) {
         availableThemes = Promise.resolve(config.paths.availableThemes);
+    }
+
+    if (!availableThemes) {
+        // A Promise that will resolve to an object with a property for each installed theme.
+        // This is necessary because certain configuration data is only available while Ghost
+        // is running and at times the validations are used when it's not (e.g. tests)
+        availableThemes = requireTree(config.paths.themePath);
     }
 
     return availableThemes.then(function (themes) {

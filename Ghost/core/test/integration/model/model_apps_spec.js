@@ -2,7 +2,6 @@
 /*jshint expr:true*/
 var testUtils    = require('../../utils'),
     should       = require('should'),
-    Promise      = require('bluebird'),
     sequence     = require('../../../server/utils/sequence'),
     _            = require('lodash'),
 
@@ -22,7 +21,6 @@ describe('App Model', function () {
 
     it('can findAll', function (done) {
         AppModel.findAll().then(function (results) {
-
             should.exist(results);
 
             results.length.should.be.above(0);

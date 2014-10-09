@@ -3,7 +3,6 @@
 var testUtils     = require('../../../utils'),
     should        = require('should'),
     supertest     = require('supertest'),
-    express       = require('express'),
 
     ghost         = require('../../../../../core'),
 
@@ -13,12 +12,10 @@ describe('Tag API', function () {
     var accesstoken = '';
 
     before(function (done) {
-        var app = express();
-
         // starting ghost automatically populates the db
         // TODO: prevent db init, and manage bringing up the DB with fixtures ourselves
-        ghost({app: app}).then(function () {
-            request = supertest.agent(app);
+        ghost().then(function (ghostServer) {
+            request = supertest.agent(ghostServer.rootApp);
         }).then(function () {
             return testUtils.doAuth(request, 'posts');
         }).then(function (token) {
@@ -40,6 +37,7 @@ describe('Tag API', function () {
         request.get(testUtils.API.getApiQuery('tags/'))
             .set('Authorization', 'Bearer ' + accesstoken)
             .expect('Content-Type', /json/)
+            .expect('Cache-Control', testUtils.cacheRules['private'])
             .expect(200)
             .end(function (err, res) {
                 if (err) {
@@ -57,6 +55,4 @@ describe('Tag API', function () {
                 done();
             });
     });
-
-
 });

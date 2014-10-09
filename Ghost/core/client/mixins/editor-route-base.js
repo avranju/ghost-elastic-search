@@ -4,6 +4,7 @@ import loadingIndicator from 'ghost/mixins/loading-indicator';
 import editorShortcuts from 'ghost/utils/editor-shortcuts';
 
 var EditorRouteBase = Ember.Mixin.create(styleBody, ShortcutsRoute, loadingIndicator, {
+
     actions: {
         save: function () {
             this.get('controller').send('save');
@@ -20,6 +21,16 @@ var EditorRouteBase = Ember.Mixin.create(styleBody, ShortcutsRoute, loadingIndic
         codeMirrorShortcut: function (options) {
             this.get('controller.codemirror').shortcut(options.type);
         }
+    },
+
+    renderTemplate: function (controller, model) {
+        this._super();
+
+        this.render('post-settings-menu', {
+            into: 'application',
+            outlet: 'settings-menu',
+            model: model
+        });
     },
 
     shortcuts: editorShortcuts,

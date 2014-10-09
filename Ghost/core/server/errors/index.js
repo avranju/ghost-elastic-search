@@ -4,16 +4,16 @@ var _                          = require('lodash'),
     path                       = require('path'),
     Promise                    = require('bluebird'),
     hbs                        = require('express-hbs'),
-    NotFoundError              = require('./notfounderror'),
-    BadRequestError            = require('./badrequesterror'),
-    InternalServerError        = require('./internalservererror'),
-    NoPermissionError          = require('./nopermissionerror'),
-    RequestEntityTooLargeError = require('./requesttoolargeerror'),
-    UnauthorizedError          = require('./unauthorizederror'),
-    ValidationError            = require('./validationerror'),
-    UnsupportedMediaTypeError  = require('./unsupportedmediaerror'),
-    EmailError                 = require('./emailerror'),
-    DataImportError            = require('./dataimporterror'),
+    NotFoundError              = require('./not-found-error'),
+    BadRequestError            = require('./bad-request-error'),
+    InternalServerError        = require('./internal-server-error'),
+    NoPermissionError          = require('./no-permission-error'),
+    RequestEntityTooLargeError = require('./request-too-large-error'),
+    UnauthorizedError          = require('./unauthorized-error'),
+    ValidationError            = require('./validation-error'),
+    UnsupportedMediaTypeError  = require('./unsupported-media-type-error'),
+    EmailError                 = require('./email-error'),
+    DataImportError            = require('./data-import-error'),
     config,
     errors,
 
@@ -63,7 +63,6 @@ errors = {
         if ((process.env.NODE_ENV === 'development' ||
             process.env.NODE_ENV === 'staging' ||
             process.env.NODE_ENV === 'production')) {
-
             var msg = [component.cyan + ':'.cyan, info.cyan];
 
             console.info.apply(console, msg);
@@ -74,7 +73,7 @@ errors = {
         if ((process.env.NODE_ENV === 'development' ||
             process.env.NODE_ENV === 'staging' ||
             process.env.NODE_ENV === 'production')) {
-
+            warn = warn || 'no message supplied';
             var msgs = ['\nWarning:'.yellow, warn.yellow, '\n'];
 
             if (context) {
@@ -109,19 +108,18 @@ errors = {
         stack = err ? err.stack : null;
 
         err = _.isString(err) ? err : (_.isObject(err) ? err.message : 'An unknown error occurred.');
-        
+
         // Overwrite error to provide information that this is probably a permission problem
         // TODO: https://github.com/TryGhost/Ghost/issues/3687
         if (err.indexOf('SQLITE_READONLY') !== -1) {
-            context = "Your database is in read only mode. Visitors can read your blog, but you can't log in or add posts.";
-            help = "Check your database file and make sure that file owner and permissions are correct.";
+            context = 'Your database is in read only mode. Visitors can read your blog, but you can\'t log in or add posts.';
+            help = 'Check your database file and make sure that file owner and permissions are correct.';
         }
         // TODO: Logging framework hookup
         // Eventually we'll have better logging which will know about envs
         if ((process.env.NODE_ENV === 'development' ||
             process.env.NODE_ENV === 'staging' ||
             process.env.NODE_ENV === 'production')) {
-
             msgs = ['\nERROR:'.red, err.red, '\n'];
 
             if (context) {
@@ -216,8 +214,8 @@ errors = {
                         }
 
                         return {
-                            'function': parts[1],
-                            'at': parts[2]
+                            function: parts[1],
+                            at: parts[2]
                         };
                     })
                     .filter(function (line) {

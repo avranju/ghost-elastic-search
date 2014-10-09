@@ -28,7 +28,6 @@ function _ConvertPhrase(testPhrase) {
     }, testPhrase);
 }
 
-
 describe('Ghost GFM showdown extension', function () {
     /*jslint regexp: true */
 
@@ -41,11 +40,20 @@ describe('Ghost GFM showdown extension', function () {
             processor.should.have.property('type');
             processor.type.should.be.a.String;
         });
-
     });
 
     it('should replace showdown strike through with html', function () {
         var testPhrase = {input: '~T~Tfoo_bar~T~T', output: /<del>foo_bar<\/del>/},
+            processedMarkup = _ConvertPhrase(testPhrase.input);
+
+        // The image is the entire markup, so the image box should be too
+        processedMarkup.should.match(testPhrase.output);
+    });
+
+    it('should honour escaped tildes', function () {
+        /*jshint -W044 */
+        var testPhrase = {input: '\\~T\\~Tfoo_bar\\~T\\~T', output: /~T~Tfoo_bar~T~T/},
+        /*jshint +W044 */
             processedMarkup = _ConvertPhrase(testPhrase.input);
 
         // The image is the entire markup, so the image box should be too
@@ -58,7 +66,6 @@ describe('Ghost GFM showdown extension', function () {
 
         processedMarkup.should.match(testPhrase.output);
     });
-
 
     it('should auto-link URL in text with markdown syntax', function () {
         var testPhrases = [
@@ -271,5 +278,4 @@ describe('Ghost GFM showdown extension', function () {
             processedMarkup.should.match(testPhrase.output);
         });
     });
-
 });

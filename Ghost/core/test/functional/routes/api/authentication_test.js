@@ -1,24 +1,20 @@
 /*global describe, it, before, after */
 /*jshint expr:true*/
 var supertest     = require('supertest'),
-    express       = require('express'),
     should        = require('should'),
     testUtils     = require('../../../utils'),
     user          = testUtils.DataGenerator.forModel.users[0],
     ghost         = require('../../../../../core'),
     request;
 
-
 describe('Authentication API', function () {
     var accesstoken = '';
 
     before(function (done) {
-        var app = express();
-
         // starting ghost automatically populates the db
         // TODO: prevent db init, and manage bringing up the DB with fixtures ourselves
-        ghost({app: app}).then(function () {
-            request = supertest.agent(app);
+        ghost().then(function (ghostServer) {
+            request = supertest.agent(ghostServer.rootApp);
         }).then(function () {
             return testUtils.doAuth(request);
         }).then(function (token) {
@@ -38,8 +34,10 @@ describe('Authentication API', function () {
 
     it('can authenticate', function (done) {
         request.post(testUtils.API.getApiQuery('authentication/token'))
-            .send({ grant_type: 'password', username: user.email, password: user.password, client_id: 'ghost-admin'})
+            .send({grant_type: 'password', username: user.email, password: user.password, client_id: 'ghost-admin'})
             .expect('Content-Type', /json/)
+            // TODO: make it possible to override oauth2orize's header so that this is consistent
+            .expect('Cache-Control', 'no-store')
             .expect(200)
             .end(function (err, res) {
                 if (err) {
@@ -57,8 +55,9 @@ describe('Authentication API', function () {
 
     it('can\'t authenticate unknown user', function (done) {
         request.post(testUtils.API.getApiQuery('authentication/token'))
-            .send({ grant_type: 'password', username: 'invalid@email.com', password: user.password, client_id: 'ghost-admin'})
+            .send({grant_type: 'password', username: 'invalid@email.com', password: user.password, client_id: 'ghost-admin'})
             .expect('Content-Type', /json/)
+            .expect('Cache-Control', testUtils.cacheRules['private'])
             .expect(404)
             .end(function (err, res) {
                 if (err) {
@@ -73,8 +72,9 @@ describe('Authentication API', function () {
 
     it('can\'t authenticate invalid password user', function (done) {
         request.post(testUtils.API.getApiQuery('authentication/token'))
-            .send({ grant_type: 'password', username: user.email, password: 'invalid', client_id: 'ghost-admin'})
+            .send({grant_type: 'password', username: user.email, password: 'invalid', client_id: 'ghost-admin'})
             .expect('Content-Type', /json/)
+            .expect('Cache-Control', testUtils.cacheRules['private'])
             .expect(401)
             .end(function (err, res) {
                 if (err) {
@@ -89,8 +89,10 @@ describe('Authentication API', function () {
 
     it('can request new access token', function (done) {
         request.post(testUtils.API.getApiQuery('authentication/token'))
-            .send({ grant_type: 'password', username: user.email, password: user.password, client_id: 'ghost-admin'})
+            .send({grant_type: 'password', username: user.email, password: user.password, client_id: 'ghost-admin'})
             .expect('Content-Type', /json/)
+            // TODO: make it possible to override oauth2orize's header so that this is consistent
+            .expect('Cache-Control', 'no-store')
             .expect(200)
             .end(function (err, res) {
                 if (err) {
@@ -98,8 +100,10 @@ describe('Authentication API', function () {
                 }
                 var refreshToken = res.body.refresh_token;
                 request.post(testUtils.API.getApiQuery('authentication/token'))
-                    .send({ grant_type: 'refresh_token', refresh_token: refreshToken, client_id: 'ghost-admin'})
+                    .send({grant_type: 'refresh_token', refresh_token: refreshToken, client_id: 'ghost-admin'})
                     .expect('Content-Type', /json/)
+                    // TODO: make it possible to override oauth2orize's header so that this is consistent
+                   .expect('Cache-Control', 'no-store')
                     .expect(200)
                     .end(function (err, res) {
                         if (err) {
@@ -115,8 +119,9 @@ describe('Authentication API', function () {
 
     it('can\'t request new access token with invalid refresh token', function (done) {
         request.post(testUtils.API.getApiQuery('authentication/token'))
-            .send({ grant_type: 'refresh_token', refresh_token: 'invalid', client_id: 'ghost-admin'})
+            .send({grant_type: 'refresh_token', refresh_token: 'invalid', client_id: 'ghost-admin'})
             .expect('Content-Type', /json/)
+            .expect('Cache-Control', testUtils.cacheRules['private'])
             .expect(403)
             .end(function (err, res) {
                 if (err) {

@@ -47,8 +47,8 @@ CasperTest.begin('Ensures dated permalinks works with RSS', 2, function suite(te
     casper.thenOpen(url + 'rss/', function (response) {
         var content = this.getHTML(),
             today = new Date(),
-            dd = ("0" + today.getDate()).slice(-2),
-            mm = ("0" + (today.getMonth() + 1)).slice(-2),
+            dd = ('0' + today.getDate()).slice(-2),
+            mm = ('0' + (today.getMonth() + 1)).slice(-2),
             yyyy = today.getFullYear(),
             postLink = '/' + yyyy + '/' + mm + '/' + dd + '/welcome-to-ghost/';
 
@@ -64,4 +64,3 @@ CasperTest.begin('Ensure that character set is UTF-8 for RSS feed', 1, function 
         test.assertEqual(response.headers.get('Content-Type'), 'text/xml; charset=utf-8', 'Content type should include UTF-8 character set encoding.');
     });
 }, false);
-

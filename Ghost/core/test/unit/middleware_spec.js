@@ -3,12 +3,9 @@
 var assert          = require('assert'),
     should          = require('should'),
     sinon           = require('sinon'),
-    _               = require('lodash'),
-    api             = require('../../server/api'),
     middleware      = require('../../server/middleware').middleware;
 
 describe('Middleware', function () {
-
     // TODO: needs new test for ember admin
     // describe('redirectToDashboard', function () {
     //     var req, res;
@@ -79,11 +76,11 @@ describe('Middleware', function () {
     });
 
     describe('whenEnabled', function () {
-        var cbFn, server;
+        var cbFn, blogApp;
 
         beforeEach(function () {
             cbFn = sinon.spy();
-            server = {
+            blogApp = {
                 enabled: function (setting) {
                     if (setting === 'enabled') {
                         return true;
@@ -92,7 +89,7 @@ describe('Middleware', function () {
                     }
                 }
             };
-            middleware.cacheServer(server);
+            middleware.cacheBlogApp(blogApp);
         });
 
         it('should call function if setting is enabled', function (done) {
@@ -174,4 +171,3 @@ describe('Middleware', function () {
         });
     });
 });
-

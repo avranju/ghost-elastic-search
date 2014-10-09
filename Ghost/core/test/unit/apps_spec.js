@@ -16,7 +16,6 @@ var path         = require('path'),
     AppPermissions  = require('../../server/apps/permissions');
 
 describe('Apps', function () {
-
     var sandbox,
         fakeApi;
 
@@ -118,22 +117,19 @@ describe('Apps', function () {
         });
 
         it('allows filter registration with permission', function (done) {
-            var registerSpy = sandbox.spy(filters, 'registerFilter');
-
-            var appProxy = new AppProxy({
-                name: 'TestApp',
-                permissions: {
-                    filters: ['testFilter'],
-                    helpers: ['myTestHelper'],
-                    posts: ['browse', 'read', 'edit', 'add', 'delete']
-                }
-            });
-
-            var fakePosts = [{ id: 0 }, { id: 1 }];
-
-            var filterStub = sandbox.spy(function (val) {
-                return val;
-            });
+            var registerSpy = sandbox.spy(filters, 'registerFilter'),
+                appProxy = new AppProxy({
+                    name: 'TestApp',
+                    permissions: {
+                        filters: ['testFilter'],
+                        helpers: ['myTestHelper'],
+                        posts: ['browse', 'read', 'edit', 'add', 'delete']
+                    }
+                }),
+                fakePosts = [{id: 0}, {id: 1}],
+                filterStub = sandbox.spy(function (val) {
+                    return val;
+                });
 
             appProxy.filters.register('testFilter', 5, filterStub);
 
@@ -151,18 +147,16 @@ describe('Apps', function () {
         });
 
         it('does not allow filter registration without permission', function () {
-            var registerSpy = sandbox.spy(filters, 'registerFilter');
-
-            var appProxy = new AppProxy({
-                name: 'TestApp',
-                permissions: {
-                    filters: ['prePostRender'],
-                    helpers: ['myTestHelper'],
-                    posts: ['browse', 'read', 'edit', 'add', 'delete']
-                }
-            });
-
-            var filterStub = sandbox.stub().returns('test result');
+            var registerSpy = sandbox.spy(filters, 'registerFilter'),
+                appProxy = new AppProxy({
+                    name: 'TestApp',
+                    permissions: {
+                        filters: ['prePostRender'],
+                        helpers: ['myTestHelper'],
+                        posts: ['browse', 'read', 'edit', 'add', 'delete']
+                    }
+                }),
+                filterStub = sandbox.stub().returns('test result');
 
             function registerFilterWithoutPermission() {
                 appProxy.filters.register('superSecretFilter', 5, filterStub);
@@ -175,20 +169,17 @@ describe('Apps', function () {
         });
 
         it('allows filter deregistration with permission', function (done) {
-            var registerSpy = sandbox.spy(filters, 'deregisterFilter');
-
-            var appProxy = new AppProxy({
-                name: 'TestApp',
-                permissions: {
-                    filters: ['prePostsRender'],
-                    helpers: ['myTestHelper'],
-                    posts: ['browse', 'read', 'edit', 'add', 'delete']
-                }
-            });
-
-            var fakePosts = [{ id: 0 }, { id: 1 }];
-
-            var filterStub = sandbox.stub().returns(fakePosts);
+            var registerSpy = sandbox.spy(filters, 'deregisterFilter'),
+                appProxy = new AppProxy({
+                    name: 'TestApp',
+                    permissions: {
+                        filters: ['prePostsRender'],
+                        helpers: ['myTestHelper'],
+                        posts: ['browse', 'read', 'edit', 'add', 'delete']
+                    }
+                }),
+                fakePosts = [{id: 0}, {id: 1}],
+                filterStub = sandbox.stub().returns(fakePosts);
 
             appProxy.filters.deregister('prePostsRender', 5, filterStub);
 
@@ -205,18 +196,16 @@ describe('Apps', function () {
         });
 
         it('does not allow filter deregistration without permission', function () {
-            var registerSpy = sandbox.spy(filters, 'deregisterFilter');
-
-            var appProxy = new AppProxy({
-                name: 'TestApp',
-                permissions: {
-                    filters: ['prePostRender'],
-                    helpers: ['myTestHelper'],
-                    posts: ['browse', 'read', 'edit', 'add', 'delete']
-                }
-            });
-
-            var filterStub = sandbox.stub().returns('test result');
+            var registerSpy = sandbox.spy(filters, 'deregisterFilter'),
+                appProxy = new AppProxy({
+                    name: 'TestApp',
+                    permissions: {
+                        filters: ['prePostRender'],
+                        helpers: ['myTestHelper'],
+                        posts: ['browse', 'read', 'edit', 'add', 'delete']
+                    }
+                }),
+                filterStub = sandbox.stub().returns('test result');
 
             function deregisterFilterWithoutPermission() {
                 appProxy.filters.deregister('superSecretFilter', 5, filterStub);
@@ -229,16 +218,15 @@ describe('Apps', function () {
         });
 
         it('allows helper registration with permission', function () {
-            var registerSpy = sandbox.spy(helpers, 'registerThemeHelper');
-
-            var appProxy = new AppProxy({
-                name: 'TestApp',
-                permissions: {
-                    filters: ['prePostRender'],
-                    helpers: ['myTestHelper'],
-                    posts: ['browse', 'read', 'edit', 'add', 'delete']
-                }
-            });
+            var registerSpy = sandbox.spy(helpers, 'registerThemeHelper'),
+                appProxy = new AppProxy({
+                    name: 'TestApp',
+                    permissions: {
+                        filters: ['prePostRender'],
+                        helpers: ['myTestHelper'],
+                        posts: ['browse', 'read', 'edit', 'add', 'delete']
+                    }
+                });
 
             appProxy.helpers.register('myTestHelper', sandbox.stub().returns('test result'));
 
@@ -246,16 +234,15 @@ describe('Apps', function () {
         });
 
         it('does not allow helper registration without permission', function () {
-            var registerSpy = sandbox.spy(helpers, 'registerThemeHelper');
-
-            var appProxy = new AppProxy({
-                name: 'TestApp',
-                permissions: {
-                    filters: ['prePostRender'],
-                    helpers: ['myTestHelper'],
-                    posts: ['browse', 'read', 'edit', 'add', 'delete']
-                }
-            });
+            var registerSpy = sandbox.spy(helpers, 'registerThemeHelper'),
+                appProxy = new AppProxy({
+                    name: 'TestApp',
+                    permissions: {
+                        filters: ['prePostRender'],
+                        helpers: ['myTestHelper'],
+                        posts: ['browse', 'read', 'edit', 'add', 'delete']
+                    }
+                });
 
             function registerWithoutPermissions() {
                 appProxy.helpers.register('otherHelper', sandbox.stub().returns('test result'));
@@ -380,39 +367,38 @@ describe('Apps', function () {
     });
 
     describe('Permissions', function () {
-        /*jshint quotmark:false*/
         var noGhostPackageJson = {
-                "name": "myapp",
-                "version": "0.0.1",
-                "description": "My example app",
-                "main": "index.js",
-                "scripts": {
-                    "test": "echo \"Error: no test specified\" && exit 1"
+                name: 'myapp',
+                version: '0.0.1',
+                description: 'My example app',
+                main: 'index.js',
+                scripts: {
+                    test: 'echo \'Error: no test specified\' && exit 1'
                 },
-                "author": "Ghost",
-                "license": "MIT",
-                "dependencies": {
-                    "ghost-app": "0.0.1"
+                author: 'Ghost',
+                license: 'MIT',
+                dependencies: {
+                    'ghost-app': '0.0.1'
                 }
             },
             validGhostPackageJson = {
-                "name": "myapp",
-                "version": "0.0.1",
-                "description": "My example app",
-                "main": "index.js",
-                "scripts": {
-                    "test": "echo \"Error: no test specified\" && exit 1"
+                name: 'myapp',
+                version: '0.0.1',
+                description: 'My example app',
+                main: 'index.js',
+                scripts: {
+                    test: 'echo \'Error: no test specified\' && exit 1'
                 },
-                "author": "Ghost",
-                "license": "MIT",
-                "dependencies": {
-                    "ghost-app": "0.0.1"
+                author: 'Ghost',
+                license: 'MIT',
+                dependencies: {
+                    'ghost-app': '0.0.1'
                 },
-                "ghost": {
-                    "permissions": {
-                        "posts": ["browse", "read", "edit", "add", "delete"],
-                        "users": ["browse", "read", "edit", "add", "delete"],
-                        "settings": ["browse", "read", "edit", "add", "delete"]
+                ghost: {
+                    permissions: {
+                        posts: ['browse', 'read', 'edit', 'add', 'delete'],
+                        users: ['browse', 'read', 'edit', 'add', 'delete'],
+                        settings: ['browse', 'read', 'edit', 'add', 'delete']
                     }
                 }
             };
@@ -422,17 +408,17 @@ describe('Apps', function () {
 
             should.exist(AppPermissions.DefaultPermissions.posts);
 
-            AppPermissions.DefaultPermissions.posts.should.contain('browse');
-            AppPermissions.DefaultPermissions.posts.should.contain('read');
+            AppPermissions.DefaultPermissions.posts.should.containEql('browse');
+            AppPermissions.DefaultPermissions.posts.should.containEql('read');
 
             // Make it hurt to add more so additional checks are added here
             _.keys(AppPermissions.DefaultPermissions).length.should.equal(1);
         });
         it('uses default permissions if no package.json', function (done) {
-            var perms = new AppPermissions("test");
+            var perms = new AppPermissions('test');
 
             // No package.json in this directory
-            sandbox.stub(perms, "checkPackageContentsExists").returns(Promise.resolve(false));
+            sandbox.stub(perms, 'checkPackageContentsExists').returns(Promise.resolve(false));
 
             perms.read().then(function (readPerms) {
                 should.exist(readPerms);
@@ -443,13 +429,13 @@ describe('Apps', function () {
             }).catch(done);
         });
         it('uses default permissions if no ghost object in package.json', function (done) {
-            var perms = new AppPermissions("test"),
+            var perms = new AppPermissions('test'),
                 noGhostPackageJsonContents = JSON.stringify(noGhostPackageJson, null, 2);
 
             // package.json IS in this directory
-            sandbox.stub(perms, "checkPackageContentsExists").returns(Promise.resolve(true));
+            sandbox.stub(perms, 'checkPackageContentsExists').returns(Promise.resolve(true));
             // no ghost property on package
-            sandbox.stub(perms, "getPackageContents").returns(Promise.resolve(noGhostPackageJsonContents));
+            sandbox.stub(perms, 'getPackageContents').returns(Promise.resolve(noGhostPackageJsonContents));
 
             perms.read().then(function (readPerms) {
                 should.exist(readPerms);
@@ -460,12 +446,12 @@ describe('Apps', function () {
             }).catch(done);
         });
         it('rejects when reading malformed package.json', function (done) {
-            var perms = new AppPermissions("test");
+            var perms = new AppPermissions('test');
 
             // package.json IS in this directory
-            sandbox.stub(perms, "checkPackageContentsExists").returns(Promise.resolve(true));
+            sandbox.stub(perms, 'checkPackageContentsExists').returns(Promise.resolve(true));
             // malformed JSON on package
-            sandbox.stub(perms, "getPackageContents").returns(Promise.reject(new Error('package.json file is malformed')));
+            sandbox.stub(perms, 'getPackageContents').returns(Promise.reject(new Error('package.json file is malformed')));
 
             perms.read().then(function (readPerms) {
                 /*jshint unused:false*/
@@ -476,13 +462,13 @@ describe('Apps', function () {
             });
         });
         it('reads from package.json in root of app directory', function (done) {
-            var perms = new AppPermissions("test"),
+            var perms = new AppPermissions('test'),
                 validGhostPackageJsonContents = validGhostPackageJson;
 
             // package.json IS in this directory
-            sandbox.stub(perms, "checkPackageContentsExists").returns(Promise.resolve(true));
+            sandbox.stub(perms, 'checkPackageContentsExists').returns(Promise.resolve(true));
             // valid ghost property on package
-            sandbox.stub(perms, "getPackageContents").returns(Promise.resolve(validGhostPackageJsonContents));
+            sandbox.stub(perms, 'getPackageContents').returns(Promise.resolve(validGhostPackageJsonContents));
 
             perms.read().then(function (readPerms) {
                 should.exist(readPerms);

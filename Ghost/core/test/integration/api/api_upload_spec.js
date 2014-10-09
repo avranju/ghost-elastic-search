@@ -17,7 +17,7 @@ describe('Upload API', function () {
     // Doesn't test the DB
 
     afterEach(function () {
-        storage.get_storage.restore();
+        storage.getStorage.restore();
         fs.unlink.restore();
     });
 
@@ -26,7 +26,7 @@ describe('Upload API', function () {
         store.save = sinon.stub().returns(Promise.resolve('URL'));
         store.exists = sinon.stub().returns(Promise.resolve(true));
         store.destroy = sinon.stub().returns(Promise.resolve());
-        sinon.stub(storage, 'get_storage').returns(store);
+        sinon.stub(storage, 'getStorage').returns(store);
         sinon.stub(fs, 'unlink').yields();
     });
 
@@ -40,11 +40,11 @@ describe('Upload API', function () {
                 path: '/tmp/TMPFILEID'
             };
             UploadAPI.add({uploadimage: uploadimage}).then(function () {
-                    done(new Error('Upload suceeded with invalid file.'));
-                }, function (result) {
-                    result.code.should.equal(415);
-                    result.type.should.equal('UnsupportedMediaTypeError');
-                    done();
+                done(new Error('Upload suceeded with invalid file.'));
+            }, function (result) {
+                result.code.should.equal(415);
+                result.type.should.equal('UnsupportedMediaTypeError');
+                done();
             });
         });
     });
@@ -57,11 +57,11 @@ describe('Upload API', function () {
                 path: '/tmp/TMPFILEID'
             };
             UploadAPI.add({uploadimage: uploadimage}).then(function () {
-                    done(new Error('Upload suceeded with invalid file.'));
-                }, function (result) {
-                    result.code.should.equal(415);
-                    result.type.should.equal('UnsupportedMediaTypeError');
-                    done();
+                done(new Error('Upload suceeded with invalid file.'));
+            }, function (result) {
+                result.code.should.equal(415);
+                result.type.should.equal('UnsupportedMediaTypeError');
+                done();
             });
         });
     });
@@ -77,7 +77,6 @@ describe('Upload API', function () {
                 result.should.equal('URL');
                 done();
             });
-
         });
 
         it('cannot upload jpg with incorrect extension', function (done) {
@@ -87,11 +86,11 @@ describe('Upload API', function () {
                 path: '/tmp/TMPFILEID'
             };
             UploadAPI.add({uploadimage: uploadimage}).then(function () {
-                    done(new Error('Upload suceeded with invalid file.'));
-                }, function (result) {
-                    result.code.should.equal(415);
-                    result.type.should.equal('UnsupportedMediaTypeError');
-                    done();
+                done(new Error('Upload suceeded with invalid file.'));
+            }, function (result) {
+                result.code.should.equal(415);
+                result.type.should.equal('UnsupportedMediaTypeError');
+                done();
             });
         });
 

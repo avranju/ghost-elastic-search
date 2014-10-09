@@ -14,14 +14,14 @@ var EditorViewMixin = Ember.Mixin.create({
 
     // all child views will have rendered when this fires
     afterRenderEvent: function () {
-        var $previewViewPort = this.$('.entry-preview-content');
+        var $previewViewPort = this.$('.js-entry-preview-content');
 
         // cache these elements for use in other methods
         this.set('$previewViewPort', $previewViewPort);
-        this.set('$previewContent', this.$('.rendered-markdown'));
+        this.set('$previewContent', this.$('.js-rendered-markdown'));
 
         $previewViewPort.scroll(Ember.run.bind($previewViewPort, setScrollClassName, {
-            target: this.$('.entry-preview'),
+            target: this.$('.js-entry-preview'),
             offset: 10
         }));
     },
@@ -40,18 +40,16 @@ var EditorViewMixin = Ember.Mixin.create({
         }
 
         var scrollInfo = this.get('markdownScrollInfo'),
-            codemirror = scrollInfo.codemirror,
-            markdownHeight = scrollInfo.height - scrollInfo.clientHeight,
-            previewHeight = this.get('$previewContent').height() - this.get('$previewViewPort').height(),
-            ratio = previewHeight / markdownHeight,
-            previewPosition = scrollInfo.top * ratio,
-            isCursorAtEnd = codemirror.getCursor('end').line > codemirror.lineCount() - 5;
+            markdownHeight,
+            previewHeight,
+            ratio;
 
-        if (isCursorAtEnd) {
-            previewPosition = previewHeight + 30;
-        }
+        markdownHeight = scrollInfo.height - scrollInfo.clientHeight;
+        previewHeight = this.get('$previewContent').height() - this.get('$previewViewPort').height();
 
-        return previewPosition;
+        ratio = previewHeight / markdownHeight;
+
+        return scrollInfo.top * ratio;
     })
 });
 

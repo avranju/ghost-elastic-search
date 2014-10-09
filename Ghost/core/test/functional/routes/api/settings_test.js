@@ -3,7 +3,6 @@
 var testUtils     = require('../../../utils'),
     should        = require('should'),
     supertest     = require('supertest'),
-    express       = require('express'),
 
     ghost         = require('../../../../../core'),
 
@@ -13,12 +12,10 @@ describe('Settings API', function () {
     var accesstoken = '';
 
     before(function (done) {
-        var app = express();
-
         // starting ghost automatically populates the db
         // TODO: prevent db init, and manage bringing up the DB with fixtures ourselves
-        ghost({app: app}).then(function () {
-            request = supertest.agent(app);
+        ghost().then(function (ghostServer) {
+            request = supertest.agent(ghostServer.rootApp);
         }).then(function () {
             return testUtils.doAuth(request);
         }).then(function (token) {
@@ -41,6 +38,7 @@ describe('Settings API', function () {
         request.get(testUtils.API.getApiQuery('settings/'))
             .set('Authorization', 'Bearer ' + accesstoken)
             .expect('Content-Type', /json/)
+            .expect('Cache-Control', testUtils.cacheRules['private'])
             .expect(200)
             .end(function (err, res) {
                 if (err) {
@@ -60,6 +58,7 @@ describe('Settings API', function () {
         request.get(testUtils.API.getApiQuery('settings/title/'))
             .set('Authorization', 'Bearer ' + accesstoken)
             .expect('Content-Type', /json/)
+            .expect('Cache-Control', testUtils.cacheRules['private'])
             .expect(200)
             .end(function (err, res) {
                 if (err) {
@@ -72,7 +71,7 @@ describe('Settings API', function () {
                 jsonResponse.should.exist;
                 jsonResponse.settings.should.exist;
 
-                testUtils.API.checkResponseValue(jsonResponse.settings[0], ['id','uuid','key','value','type','created_at','created_by','updated_at','updated_by']);
+                testUtils.API.checkResponseValue(jsonResponse.settings[0], ['id', 'uuid', 'key', 'value', 'type', 'created_at', 'created_by', 'updated_at', 'updated_by']);
                 jsonResponse.settings[0].key.should.eql('title');
                 testUtils.API.isISO8601(jsonResponse.settings[0].created_at).should.be.true;
                 done();
@@ -83,6 +82,7 @@ describe('Settings API', function () {
         request.get(testUtils.API.getApiQuery('settings/testsetting/'))
             .set('Authorization', 'Bearer ' + accesstoken)
             .expect('Content-Type', /json/)
+            .expect('Cache-Control', testUtils.cacheRules['private'])
             .expect(404)
             .end(function (err, res) {
                 if (err) {
@@ -102,6 +102,7 @@ describe('Settings API', function () {
         request.get(testUtils.API.getApiQuery('settings/'))
             .set('Authorization', 'Bearer ' + accesstoken)
             .expect('Content-Type', /json/)
+            .expect('Cache-Control', testUtils.cacheRules['private'])
             .end(function (err, res) {
                 if (err) {
                     return done(err);
@@ -111,7 +112,7 @@ describe('Settings API', function () {
                     changedValue = 'Ghost changed',
                     settingToChange = {
                         settings: [
-                            { key: 'title', value: changedValue }
+                            {key: 'title', value: changedValue}
                         ]
                     };
 
@@ -122,6 +123,7 @@ describe('Settings API', function () {
                     .set('Authorization', 'Bearer ' + accesstoken)
                     .send(settingToChange)
                     .expect('Content-Type', /json/)
+                    .expect('Cache-Control', testUtils.cacheRules['private'])
                     .expect(200)
                     .end(function (err, res) {
                         if (err) {
@@ -142,6 +144,7 @@ describe('Settings API', function () {
         request.get(testUtils.API.getApiQuery('settings/'))
             .set('Authorization', 'Bearer ' + accesstoken)
             .expect('Content-Type', /json/)
+            .expect('Cache-Control', testUtils.cacheRules['private'])
             .end(function (err, res) {
                 if (err) {
                     return done(err);
@@ -157,6 +160,7 @@ describe('Settings API', function () {
                     .send(jsonResponse)
                     .expect(401)
                     .end(function (err, res) {
+                        /*jshint unused:false*/
                         if (err) {
                             return done(err);
                         }
@@ -166,11 +170,11 @@ describe('Settings API', function () {
             });
     });
 
-
     it('can\'t edit non existent setting', function (done) {
         request.get(testUtils.API.getApiQuery('settings/'))
             .set('Authorization', 'Bearer ' + accesstoken)
             .expect('Content-Type', /json/)
+            .expect('Cache-Control', testUtils.cacheRules['private'])
             .end(function (err, res) {
                 if (err) {
                     return done(err);
@@ -180,12 +184,13 @@ describe('Settings API', function () {
                     newValue = 'new value';
                 jsonResponse.should.exist;
                 should.exist(jsonResponse.settings);
-                jsonResponse.settings = [{ key: 'testvalue', value: newValue }];
+                jsonResponse.settings = [{key: 'testvalue', value: newValue}];
 
                 request.put(testUtils.API.getApiQuery('settings/'))
                     .set('Authorization', 'Bearer ' + accesstoken)
                     .send(jsonResponse)
                     .expect('Content-Type', /json/)
+                    .expect('Cache-Control', testUtils.cacheRules['private'])
                     .expect(404)
                     .end(function (err, res) {
                         if (err) {
@@ -200,6 +205,4 @@ describe('Settings API', function () {
                     });
             });
     });
-
-
 });

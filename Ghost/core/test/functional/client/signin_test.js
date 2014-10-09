@@ -1,7 +1,7 @@
 // # Signin Test
 // Test that signin works, including testing our spam prevention mechanisms
 
-/*globals CasperTest, casper, url, newUser, user, falseUser */
+/*globals CasperTest, casper, url, user, falseUser */
 
 CasperTest.begin('Ghost admin will load login page', 3, function suite(test) {
     CasperTest.Routines.signout.run(test);
@@ -112,7 +112,6 @@ CasperTest.begin('Authenticated user is redirected', 8, function suite(test) {
     });
 }, true);
 
-
 CasperTest.begin('Ensure email field form validation', 3, function suite(test) {
     CasperTest.Routines.signout.run(test);
 
@@ -124,7 +123,7 @@ CasperTest.begin('Ensure email field form validation', 3, function suite(test) {
     casper.waitForOpaque('.js-login-box',
         function then() {
             this.fillAndSave('form.login-form', {
-                'identification': 'notanemail'
+                identification: 'notanemail'
             });
         },
         function onTimeout() {

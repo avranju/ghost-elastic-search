@@ -1,6 +1,5 @@
 import loadingIndicator from 'ghost/mixins/loading-indicator';
 import ShortcutsRoute from 'ghost/mixins/shortcuts-route';
-import {mobileQuery} from 'ghost/utils/mobile';
 
 var PostsPostRoute = Ember.Route.extend(SimpleAuth.AuthenticatedRouteMixin, loadingIndicator, ShortcutsRoute, {
     model: function (params) {
@@ -53,18 +52,18 @@ var PostsPostRoute = Ember.Route.extend(SimpleAuth.AuthenticatedRouteMixin, load
         this._super(controller, model);
 
         this.controllerFor('posts').set('currentPost', model);
-
-        if (mobileQuery.matches) {
-            this.controllerFor('posts').send('hideContentPreview');
-        }
     },
 
     shortcuts: {
-        'enter': 'openEditor'
+        'enter, o': 'openEditor',
+        'command+backspace, ctrl+backspace': 'deletePost'
     },
     actions: {
         openEditor: function () {
             this.transitionTo('editor.edit', this.get('controller.model'));
+        },
+        deletePost: function () {
+            this.send('openModal', 'delete-post', this.get('controller.model'));
         }
     }
 });

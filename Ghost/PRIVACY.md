@@ -2,6 +2,7 @@
 
 This is a plain English summary of all of the components within Ghost which may affect your privacy in some way. Please keep in mind that if you use third party Themes or Apps with Ghost, there may be additional things not listed here.
 
+Each of the items listed in this document can be disabled via the `config.js` file. Please see the the [configuration guide](http://support.ghost.org/config/) in the support documentation for details.
 
 ## Official Services
 
@@ -17,12 +18,12 @@ This service can be disabled at any time. All of the information and code relate
 
 ## Third Party Services
 
-Ghost uses a number of third party services for specific functionality within Ghost. 
+Ghost uses a number of third party services for specific functionality within Ghost.
 
 
 ### Google Fonts
 
-Ghost makes use of the Open Sans and Inconsolata [Google Fonts](https://www.google.com/fonts). These are loaded into the Ghost admin area to provide a typographically stimulating experience.
+Ghost makes use of the Open Sans [Google Font](https://www.google.com/fonts), which is loaded into the Ghost admin area to provide a typographically stimulating experience.
 
 ### Gravatar
 

@@ -2,6 +2,7 @@ var _             = require('lodash'),
     api           = require('../api'),
     errors        = require('../errors'),
     updateCheck   = require('../update-check'),
+    config        = require('../config'),
     adminControllers;
 
 adminControllers = {
@@ -12,7 +13,9 @@ adminControllers = {
         /*jslint unparam:true*/
 
         function renderIndex() {
-            res.render('default');
+            res.render('default', {
+                skip_google_fonts: config.isPrivacyDisabled('useGoogleFonts')
+            });
         }
 
         updateCheck().then(function () {
@@ -32,8 +35,8 @@ adminControllers = {
             };
 
             return api.notifications.browse({context: {internal: true}}).then(function (results) {
-                if (!_.some(results.notifications, { message: notification.message })) {
-                    return api.notifications.add({ notifications: [notification] }, {context: {internal: true}});
+                if (!_.some(results.notifications, {message: notification.message})) {
+                    return api.notifications.add({notifications: [notification]}, {context: {internal: true}});
                 }
             });
         }).finally(function () {

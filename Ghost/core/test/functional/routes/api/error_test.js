@@ -1,27 +1,21 @@
 /*global describe, it, before, after */
-
+/*jshint expr:true*/
 // # Api Route tests
 // As it stands, these tests depend on the database, and as such are integration tests.
 // Mocking out the models to not touch the DB would turn these into unit tests, and should probably be done in future,
 // But then again testing real code, rather than mock code, might be more useful...
 
 var supertest     = require('supertest'),
-    express       = require('express'),
     should        = require('should'),
-    _             = require('lodash'),
     testUtils     = require('../../../utils'),
 
     ghost         = require('../../../../../core'),
-    request,
-    agent;
+    request;
 
 describe('Unauthorized', function () {
-
     before(function (done) {
-        var app = express();
-
-        ghost({app: app}).then(function () {
-            request = supertest.agent(app);
+        ghost().then(function (ghostServer) {
+            request = supertest.agent(ghostServer.rootApp);
 
             done();
         });
@@ -33,10 +27,10 @@ describe('Unauthorized', function () {
         }).catch(done);
     });
 
-
     describe('Unauthorized API', function () {
         it('can\'t retrieve posts', function (done) {
             request.get(testUtils.API.getApiQuery('posts/'))
+                .expect('Cache-Control', testUtils.cacheRules['private'])
                 .expect(401)
                 .end(function firstRequest(err, res) {
                     if (err) {
@@ -47,13 +41,9 @@ describe('Unauthorized', function () {
                     res.should.be.json;
                     var jsonResponse = res.body;
                     jsonResponse.should.exist;
-                    //TODO: testUtils.API.checkResponseValue(jsonResponse, ['error']);
+                    // TODO: testUtils.API.checkResponseValue(jsonResponse, ['error']);
                     done();
-
                 });
         });
-
     });
-
-
 });

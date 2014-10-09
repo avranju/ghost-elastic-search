@@ -44,17 +44,6 @@ var Codemirror = Ember.TextArea.extend(MarkerManager, {
     afterRenderEvent: function () {
         var initMarkers = _.bind(this.initMarkers, this);
 
-        // Allow tabbing behaviour when viewing on small screen (not mobile)
-        $('#entry-markdown-header').on('click', function () {
-            $('.entry-markdown').addClass('active');
-            $('.entry-preview').removeClass('active');
-        });
-
-        $('#entry-preview-header').on('click', function () {
-            $('.entry-markdown').removeClass('active');
-            $('.entry-preview').addClass('active');
-        });
-
         // replaces CodeMirror with TouchEditor only if we're on mobile
         mobileCodeMirror.createIfMobile();
 
@@ -75,7 +64,15 @@ var Codemirror = Ember.TextArea.extend(MarkerManager, {
             dragDrop:       false,
             extraKeys: {
                 Home:   'goLineLeft',
-                End:    'goLineRight'
+                End:    'goLineRight',
+                'Ctrl-U': false,
+                'Cmd-U': false,
+                'Shift-Ctrl-U': false,
+                'Shift-Cmd-U': false,
+                'Ctrl-S': false,
+                'Cmd-S': false,
+                'Ctrl-D': false,
+                'Cmd-D': false
             }
         });
 
@@ -88,7 +85,7 @@ var Codemirror = Ember.TextArea.extend(MarkerManager, {
         codemirror.on('scroll', onScrollHandler);
 
         codemirror.on('scroll', Ember.run.bind(Ember.$('.CodeMirror-scroll'), setScrollClassName, {
-            target: Ember.$('.entry-markdown'),
+            target: Ember.$('.js-entry-markdown'),
             offset: 10
         }));
 

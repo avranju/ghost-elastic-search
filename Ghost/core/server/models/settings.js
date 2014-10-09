@@ -21,11 +21,6 @@ function parseDefaultSettings() {
             setting.type = categoryName;
             setting.key = settingName;
 
-            // Special case for dbHash
-            if (setting.key === 'dbHash' && setting.defaultValue === null) {
-                setting.defaultValue = uuid.v4();
-            }
-
             defaultSettingsFlattened[settingName] = setting;
         });
     });
@@ -85,7 +80,7 @@ Settings = ghostBookshelf.Model.extend({
     findOne: function (options) {
         // Allow for just passing the key instead of attributes
         if (!_.isObject(options)) {
-            options = { key: options };
+            options = {key: options};
         }
         return Promise.resolve(ghostBookshelf.Model.findOne.call(this, options));
     },
@@ -107,14 +102,12 @@ Settings = ghostBookshelf.Model.extend({
 
             item = self.filterData(item);
 
-            return Settings.forge({ key: item.key }).fetch(options).then(function (setting) {
-
+            return Settings.forge({key: item.key}).fetch(options).then(function (setting) {
                 if (setting) {
                     return setting.save({value: item.value}, options);
                 }
 
                 return Promise.reject(new errors.NotFoundError('Unable to find setting to update: ' + item.key));
-
             }, errors.logAndThrowError);
         });
     },
@@ -124,7 +117,7 @@ Settings = ghostBookshelf.Model.extend({
             return Promise.reject(new errors.NotFoundError('Unable to find default setting: ' + key));
         }
 
-        return this.findOne({ key: key }).then(function (foundSetting) {
+        return this.findOne({key: key}).then(function (foundSetting) {
             if (foundSetting) {
                 return foundSetting;
             }

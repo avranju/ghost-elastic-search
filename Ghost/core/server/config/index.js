@@ -12,14 +12,12 @@ var path          = require('path'),
     validator     = require('validator'),
     requireTree   = require('../require-tree').readAll,
     errors        = require('../errors'),
-    theme         = require('./theme'),
     configUrl     = require('./url'),
     appRoot       = path.resolve(__dirname, '../../../'),
     corePath      = path.resolve(appRoot, 'core/'),
     testingEnvs   = ['testing', 'testing-mysql', 'testing-pg'],
     defaultConfig = {},
     knexInstance;
-
 
 function ConfigManager(config) {
     /**
@@ -30,7 +28,6 @@ function ConfigManager(config) {
     this._config = {};
 
     // Allow other modules to be externally accessible.
-    this.theme = theme;
     this.urlFor = configUrl.urlFor;
     this.urlForPost = configUrl.urlForPost;
 
@@ -110,27 +107,43 @@ ConfigManager.prototype.set = function (config) {
             knex: knexInstance
         },
         paths: {
-            'appRoot':          appRoot,
-            'subdir':           subdir,
-            'config':           this._config.paths.config || path.join(appRoot, 'config.js'),
-            'configExample':    path.join(appRoot, 'config.example.js'),
-            'corePath':         corePath,
+            appRoot:          appRoot,
+            subdir:           subdir,
+            config:           this._config.paths.config || path.join(appRoot, 'config.js'),
+            configExample:    path.join(appRoot, 'config.example.js'),
+            corePath:         corePath,
 
-            'contentPath':      contentPath,
-            'themePath':        path.resolve(contentPath, 'themes'),
-            'appPath':          path.resolve(contentPath, 'apps'),
-            'imagesPath':       path.resolve(contentPath, 'images'),
-            'imagesRelPath':    'content/images',
+            contentPath:      contentPath,
+            themePath:        path.resolve(contentPath, 'themes'),
+            appPath:          path.resolve(contentPath, 'apps'),
+            imagesPath:       path.resolve(contentPath, 'images'),
+            imagesRelPath:    'content/images',
 
-            'adminViews':       path.join(corePath, '/server/views/'),
-            'helperTemplates':  path.join(corePath, '/server/helpers/tpl/'),
-            'exportPath':       path.join(corePath, '/server/data/export/'),
-            'lang':             path.join(corePath, '/shared/lang/'),
-            'debugPath':        subdir + '/ghost/debug/',
+            adminViews:       path.join(corePath, '/server/views/'),
+            helperTemplates:  path.join(corePath, '/server/helpers/tpl/'),
+            exportPath:       path.join(corePath, '/server/data/export/'),
+            lang:             path.join(corePath, '/shared/lang/'),
+            debugPath:        subdir + '/ghost/debug/',
 
-            'availableThemes':  this._config.paths.availableThemes || {},
-            'availableApps':    this._config.paths.availableApps || {},
-            'builtScriptPath':  path.join(corePath, 'built/scripts/')
+            availableThemes:  this._config.paths.availableThemes || {},
+            availableApps:    this._config.paths.availableApps || {},
+            builtScriptPath:  path.join(corePath, 'built/scripts/')
+        },
+        theme: {
+            // normalise the URL by removing any trailing slash
+            url: this._config.url ? this._config.url.replace(/\/$/, '') : ''
+        },
+        slugs: {
+            // Used by generateSlug to generate slugs for posts, tags, users, ..
+            // reserved slugs are reserved but can be extended/removed by apps
+            // protected slugs cannot be changed or removed
+            reserved: ['admin', 'app', 'apps', 'archive', 'archives', 'categories', 'category', 'dashboard', 'feed', 'ghost-admin', 'login', 'logout', 'page', 'pages', 'post', 'posts', 'public', 'register', 'setup', 'signin', 'signout', 'signup', 'tag', 'tags', 'user', 'users', 'wp-admin', 'wp-login'],
+            protected: ['ghost', 'rss']
+        },
+        uploads: {
+            // Used by the upload API to limit uploads to images
+            extensions: ['.jpg', '.jpeg', '.gif', '.png', '.svg', '.svgz'],
+            contentTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml']
         }
     });
 
@@ -256,7 +269,7 @@ ConfigManager.prototype.validate = function () {
     }
 
     // Check that our url is valid
-    if (!validator.isURL(config.url, { protocols: ['http', 'https'], require_protocol: true })) {
+    if (!validator.isURL(config.url, {protocols: ['http', 'https'], require_protocol: true})) {
         errors.logError(new Error('Your site url in config.js is invalid.'), config.url, 'Please make sure this is a valid url before restarting');
 
         return Promise.reject(new Error('invalid site url'));
@@ -288,6 +301,55 @@ ConfigManager.prototype.validate = function () {
     }
 
     return Promise.resolve(config);
+};
+
+/**
+ * Helper method for checking the state of a particular privacy flag
+ * @param {String} privacyFlag The flag to check
+ * @returns {boolean}
+ */
+ConfigManager.prototype.isPrivacyDisabled = function (privacyFlag) {
+    if (!this.privacy) {
+        return false;
+    }
+
+    if (this.privacy.useTinfoil === true) {
+        return true;
+    }
+
+    return this.privacy[privacyFlag] === false;
+};
+
+/**
+ * Check if any of the currently set config items are deprecated, and issues a warning.
+ */
+ConfigManager.prototype.checkDeprecated = function () {
+    var deprecatedItems = ['updateCheck', 'mail.fromaddress'],
+        self = this;
+
+    _.each(deprecatedItems, function (property) {
+        self.displayDeprecated(self, property.split('.'), []);
+    });
+};
+
+ConfigManager.prototype.displayDeprecated = function (item, properties, address) {
+    var self = this,
+        property = properties.shift(),
+        errorText,
+        explanationText,
+        helpText;
+
+    address.push(property);
+
+    if (item.hasOwnProperty(property)) {
+        if (properties.length) {
+            return self.displayDeprecated(item[property], properties, address);
+        }
+        errorText = 'The configuration property [' + address.join('.').bold + '] has been deprecated.';
+        explanationText =  'This will be removed in a future version, please update your config.js file.';
+        helpText = 'Please check http://support.ghost.org/config for the most up-to-date example.';
+        errors.logWarn(errorText, explanationText, helpText);
+    }
 };
 
 if (testingEnvs.indexOf(process.env.NODE_ENV) > -1) {

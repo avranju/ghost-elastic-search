@@ -1,35 +1,21 @@
-import {mobileQuery, responsiveAction} from 'ghost/utils/mobile';
+import MobileParentView from 'ghost/views/mobile/parent-view';
 
-var PostsView = Ember.View.extend({
-    target: Ember.computed.alias('controller'),
+var PostsView = MobileParentView.extend({
     classNames: ['content-view-container'],
     tagName: 'section',
 
-    mobileInteractions: function () {
-        Ember.run.scheduleOnce('afterRender', this, function () {
-            var self = this;
-
-            $(window).resize(function () {
-                if (!mobileQuery.matches) {
-                    self.send('resetContentPreview');
-                }
-            });
-
-            // ### Show content preview when swiping left on content list
-            $('.manage').on('click', '.content-list ol li', function (event) {
-                responsiveAction(event, '(max-width: 800px)', function () {
-                    self.send('showContentPreview');
-                });
-            });
-
-            // ### Hide content preview
-            $('.manage').on('click', '.content-preview .btn .btn-default', function (event) {
-                responsiveAction(event, '(max-width: 800px)', function () {
-                    self.send('hideContentPreview');
-                });
-            });
-        });
-    }.on('didInsertElement'),
+    // Mobile parent view callbacks
+    showMenu: function () {
+        $('.js-content-list').addClass('show-menu').removeClass('show-content');
+        $('.js-content-preview').addClass('show-menu').removeClass('show-content');
+    },
+    showContent: function () {
+        $('.js-content-list').addClass('show-content').removeClass('show-menu');
+        $('.js-content-preview').addClass('show-content').removeClass('show-menu');
+    },
+    showAll: function () {
+        $('.js-content-list, .js-content-preview').removeClass('show-menu show-content');
+    }
 });
 
 export default PostsView;

@@ -2,7 +2,6 @@
 /*jshint expr:true*/
 var testUtils       = require('../../utils'),
     should          = require('should'),
-    Promise         = require('bluebird'),
     sequence        = require('../../../server/utils/sequence'),
     _               = require('lodash'),
 
@@ -15,7 +14,6 @@ describe('Post Model', function () {
     // Keep the DB clean
 
     describe('Single author posts', function () {
-
         before(testUtils.teardown);
         afterEach(testUtils.teardown);
         beforeEach(testUtils.setup('owner', 'posts', 'apps'));
@@ -25,7 +23,7 @@ describe('Post Model', function () {
         });
 
         function extractFirstPost(posts) {
-            return _.filter(posts, { id: 1 })[0];
+            return _.filter(posts, {id: 1})[0];
         }
 
         function checkFirstPostData(firstPost) {
@@ -55,13 +53,11 @@ describe('Post Model', function () {
         });
 
         it('can findAll, returning all related data', function (done) {
-            var firstPost;
-
             PostModel.findAll({include: ['author_id', 'fields', 'tags', 'created_by', 'updated_by', 'published_by']})
                 .then(function (results) {
                     should.exist(results);
                     results.length.should.be.above(0);
-                    posts = results.models.map(function (model) {
+                    var posts = results.models.map(function (model) {
                         return model.toJSON();
                     });
 
@@ -88,8 +84,6 @@ describe('Post Model', function () {
         });
 
         it('can findPage, returning all related data', function (done) {
-            var firstPost;
-
             PostModel.findPage({include: ['author_id', 'fields', 'tags', 'created_by', 'updated_by', 'published_by']})
                 .then(function (results) {
                     should.exist(results);
@@ -206,7 +200,6 @@ describe('Post Model', function () {
 
                 done();
             }).catch(done);
-
         });
 
         it('can add, with previous published_at date', function (done) {
@@ -218,12 +211,10 @@ describe('Post Model', function () {
                 title: 'published_at test',
                 markdown: 'This is some content'
             }, context).then(function (newPost) {
-
                 should.exist(newPost);
                 new Date(newPost.get('published_at')).getTime().should.equal(previousPublishedAtDate.getTime());
 
                 done();
-
             }).catch(done);
         });
 
@@ -236,12 +227,12 @@ describe('Post Model', function () {
                 };
 
             PostModel.add(newPost, context).then(function (createdPost) {
-                return new PostModel({ id: createdPost.id }).fetch();
+                return new PostModel({id: createdPost.id}).fetch();
             }).then(function (createdPost) {
                 should.exist(createdPost);
                 createdPost.get('title').should.equal(untrimmedCreateTitle.trim());
 
-                return createdPost.save({ title: untrimmedUpdateTitle }, context);
+                return createdPost.save({title: untrimmedUpdateTitle}, context);
             }).then(function (updatedPost) {
                 updatedPost.get('title').should.equal(untrimmedUpdateTitle.trim());
 
@@ -255,7 +246,7 @@ describe('Post Model', function () {
                 return function () {
                     return PostModel.add({
                         title: 'Test Title',
-                        markdown: 'Test Content ' + (i+1)
+                        markdown: 'Test Content ' + (i + 1)
                     }, context);
                 };
             })).then(function (createdPosts) {
@@ -287,14 +278,13 @@ describe('Post Model', function () {
             };
 
             PostModel.add(newPost, context).then(function (createdPost) {
-
                 createdPost.get('slug').should.equal('apprehensive-titles-have-too-many-spaces-and-m-dashes-and-also-n-dashes');
 
                 done();
             }).catch(done);
         });
 
-        it('can generate a safe slug when a reserved keyword is used', function(done) {
+        it('can generate a safe slug when a reserved keyword is used', function (done) {
             var newPost = {
                 title: 'rss',
                 markdown: 'Test Content 1'
@@ -345,7 +335,6 @@ describe('Post Model', function () {
                         slug: firstPost.slug
                     }, context);
                 }).then(function (updatedSecondPost) {
-
                     // Should have updated from original
                     updatedSecondPost.get('slug').should.not.equal(secondPost.slug);
                     // Should not have a conflicted slug from the first
@@ -356,7 +345,6 @@ describe('Post Model', function () {
                         status: 'all'
                     });
                 }).then(function (foundPost) {
-
                     // Should have updated from original
                     foundPost.get('slug').should.not.equal(secondPost.slug);
                     // Should not have a conflicted slug from the first
@@ -398,7 +386,6 @@ describe('Post Model', function () {
 
         it('can findPage, with various options', function (done) {
             testUtils.fixtures.insertMorePosts().then(function () {
-
                 return testUtils.fixtures.insertMorePostsTags();
             }).then(function () {
                 return PostModel.findPage({page: 2});
@@ -448,7 +435,6 @@ describe('Post Model', function () {
 
         it('can findPage for tag, with various options', function (done) {
             testUtils.fixtures.insertMorePosts().then(function () {
-
                 return testUtils.fixtures.insertMorePostsTags();
             }).then(function () {
                 // Test tag filter
@@ -493,7 +479,7 @@ describe('Post Model', function () {
         });
 
         it('can NOT findPage for a page that overflows the datatype', function (done) {
-            PostModel.findPage({ page: 5700000000055345439587894375457849375284932759842375894372589243758947325894375894275894275894725897432859724309 })
+            PostModel.findPage({page: 5700000000055345439587894375457849375284932759842375894372589243758947325894375894275894275894725897432859724309})
                 .then(function (paginationResult) {
                     should.exist(paginationResult.meta);
 
@@ -503,7 +489,6 @@ describe('Post Model', function () {
                 }).catch(done);
         });
     });
-
 
     describe('Multiauthor Posts', function () {
         before(testUtils.teardown);
@@ -515,7 +500,6 @@ describe('Post Model', function () {
         });
 
         it('can destroy multiple posts by author', function (done) {
-
             // We're going to delete all posts by user 1
             var authorData = {id: 1};
 

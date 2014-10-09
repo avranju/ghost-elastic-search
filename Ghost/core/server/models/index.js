@@ -19,12 +19,10 @@ models = {
         self.Base = require('./base');
 
         // Require all files in this directory
-        return requireTree.readAll(__dirname).then(function (modelFiles) {
-
+        return requireTree.readAll(__dirname, {followSymlinks: false}).then(function (modelFiles) {
             // For each found file, excluding those we don't want,
             // we will require it and cache it here.
             _.each(modelFiles, function (path, fileName) {
-
                 // Return early if this fileName is one of the ones we want
                 // to exclude.
                 if (_.contains(self.excludeFiles, fileName)) {
@@ -36,7 +34,6 @@ models = {
 
                 // Cache its `export` object onto this object.
                 _.extend(self, file);
-
             });
 
             return;

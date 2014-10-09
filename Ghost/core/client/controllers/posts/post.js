@@ -11,6 +11,9 @@ var PostController = Ember.ObjectController.extend({
             this.get('model').save(options).catch(function (errors) {
                 self.notifications.showErrors(errors);
             });
+        },
+        showPostContent: function () {
+            this.transitionToRoute('posts.post', this.get('model'));
         }
     }
 });

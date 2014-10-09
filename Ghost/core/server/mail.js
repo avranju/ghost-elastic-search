@@ -1,7 +1,7 @@
-var cp         = require('child_process'),
-    _          = require('lodash'),
+var _          = require('lodash'),
     Promise    = require('bluebird'),
     nodemailer = require('nodemailer'),
+    validator  = require('validator'),
     config     = require('./config');
 
 function GhostMailer(opts) {
@@ -19,57 +19,40 @@ GhostMailer.prototype.init = function () {
         return Promise.resolve();
     }
 
-    // Attempt to detect and fallback to `sendmail`
-    return this.detectSendmail().then(function (binpath) {
-        self.transport = nodemailer.createTransport('sendmail', {
-            path: binpath
-        });
-        self.state.usingSendmail = true;
-    }).catch(function () {
-        self.state.emailDisabled = true;
-        self.transport = null;
-    });
-};
+    self.transport = nodemailer.createTransport('direct');
+    self.state.usingDirect = true;
 
-GhostMailer.prototype.isWindows = function () {
-    return process.platform === 'win32';
-};
-
-GhostMailer.prototype.detectSendmail = function () {
-    if (this.isWindows()) {
-        return Promise.reject();
-    }
-
-    return new Promise(function (resolve, reject) {
-        cp.exec('which sendmail', function (err, stdout) {
-            if (err && !/bin\/sendmail/.test(stdout)) {
-                return reject();
-            }
-
-            resolve(stdout.toString().replace(/(\n|\r|\r\n)$/, ''));
-        });
-    });
+    return Promise.resolve();
 };
 
 GhostMailer.prototype.createTransport = function () {
     this.transport = nodemailer.createTransport(config.mail.transport, _.clone(config.mail.options) || {});
 };
 
+GhostMailer.prototype.from = function () {
+    var from = config.mail && (config.mail.from || config.mail.fromaddress);
 
-GhostMailer.prototype.fromAddress = function () {
-    var from = config.mail && config.mail.fromaddress,
-        domain;
-
+    // If we don't have a from address at all
     if (!from) {
-        // Extract the domain name from url set in config.js
-        domain = config.url.match(new RegExp('^https?://([^/:?#]+)(?:[/:?#]|$)', 'i'));
-        domain = domain && domain[1];
-
         // Default to ghost@[blog.url]
-        from = 'ghost@' + domain;
+        from = 'ghost@' + this.getDomain();
+    }
+
+    // If we do have a from address, and it's just an email
+    if (validator.isEmail(from)) {
+        if (!config.theme.title) {
+            config.theme.title = 'Ghost at ' + this.getDomain();
+        }
+        from = config.theme.title + ' <' + from + '>';
     }
 
     return from;
+};
+
+// Moved it to its own module
+GhostMailer.prototype.getDomain = function () {
+    var domain = config.url.match(new RegExp('^https?://([^/:?#]+)(?:[/:?#]|$)', 'i'));
+    return domain && domain[1];
 };
 
 // Sends an e-mail message enforcing `to` (blog owner) and `from` fields
@@ -91,11 +74,39 @@ GhostMailer.prototype.send = function (message) {
     sendMail = Promise.promisify(self.transport.sendMail.bind(self.transport));
 
     message = _.extend(message, {
-        from: self.fromAddress(),
+        from: self.from(),
         to: to,
         generateTextFromHTML: true
     });
-    return sendMail(message);
+
+    return new Promise(function (resolve, reject) {
+        sendMail(message, function (error, response) {
+            if (error) {
+                return reject(new Error(error));
+            }
+
+            if (self.transport.transportType !== 'DIRECT') {
+                return resolve(response);
+            }
+
+            response.statusHandler.once('failed', function (data) {
+                var reason = 'Email Error: Failed sending email';
+                if (data.error.errno === 'ENOTFOUND') {
+                    reason += ': there is no mail server at this address: ' + data.domain;
+                }
+                reason += '.';
+                return reject(new Error(reason));
+            });
+
+            response.statusHandler.once('requeue', function (data) {
+                return reject(new Error('Email Error: message was not sent, requeued. Probably will not be sent. :( \nMore info: ' + data.error.message));
+            });
+
+            response.statusHandler.once('sent', function () {
+                return resolve('Message was accepted by the mail server. Make sure to check inbox and spam folders. :)');
+            });
+        });
+    });
 };
 
 module.exports = new GhostMailer();

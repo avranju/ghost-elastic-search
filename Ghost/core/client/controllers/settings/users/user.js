@@ -23,7 +23,7 @@ var SettingsUserController = Ember.ObjectController.extend({
         if (Ember.isBlank(cover)) {
             cover = this.get('coverDefault');
         }
-        return cover;
+        return 'background-image: url(' + cover + ')';
     }),
 
     coverTitle: Ember.computed('user.name', function () {
@@ -41,7 +41,7 @@ var SettingsUserController = Ember.ObjectController.extend({
     last_login: Ember.computed('user.last_login', function () {
         var lastLogin = this.get('user.last_login');
 
-        return lastLogin ? lastLogin.fromNow() : '';
+        return lastLogin ? lastLogin.fromNow() : '(Never)';
     }),
 
     created_at: Ember.computed('user.created_at', function () {
